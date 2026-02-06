@@ -1,0 +1,48 @@
+# ===============================
+# EXAMPLE APPLICATION PROPERTIES
+# ===============================
+# Copy this file to application.properties and update with your actual values
+# Do NOT commit your actual application.properties with real credentials
+
+# ===============================
+# SERVER
+# ===============================
+server.port=8080
+
+# ===============================
+# DATABASE
+# ===============================
+# For PostgreSQL (Production/Development)
+spring.datasource.url=jdbc:postgresql://localhost:5432/ecommerce_db
+spring.datasource.username=your_postgres_username
+spring.datasource.password=your_postgres_password
+
+# For H2 (Testing/Local Development)
+# spring.datasource.url=jdbc:h2:mem:testdb
+# spring.datasource.username=sa
+# spring.datasource.password=
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+# For H2, use: org.hibernate.dialect.H2Dialect
+
+# ===============================
+# SECURITY
+# ===============================
+spring.security.oauth2.resourceserver.jwt.issuer-uri=http://dummy
+
+# JWT Configuration
+# IMPORTANT: Generate a strong secret key for production!
+# You can generate one using: openssl rand -base64 64
+jwt.secret=CHANGE_THIS_TO_A_STRONG_SECRET_KEY_MINIMUM_256_BITS
+jwt.expiration=3600000
+
+# ===============================
+# ACTUATOR
+# ===============================
+management.endpoints.web.exposure.include=health,info,metrics
+management.endpoint.health.show-details=always
+management.info.env.enabled=true

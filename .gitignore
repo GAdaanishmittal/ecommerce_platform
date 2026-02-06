@@ -1,0 +1,123 @@
+# ===============================
+# FRONTEND - DO NOT COMMIT
+# ===============================
+frontend/
+
+# ===============================
+# Maven Build
+# ===============================
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# ===============================
+# IDE - IntelliJ IDEA
+# ===============================
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+.idea_modules/
+
+# ===============================
+# IDE - Eclipse / STS
+# ===============================
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.loadpath
+.recommenders
+
+# ===============================
+# IDE - NetBeans
+# ===============================
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ===============================
+# IDE - VS Code
+# ===============================
+.vscode/
+.code-workspace
+
+# ===============================
+# Python Virtual Environment
+# ===============================
+.venv/
+venv/
+ENV/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# ===============================
+# Operating System Files
+# ===============================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ===============================
+# Application Logs
+# ===============================
+*.log
+logs/
+spring.log
+
+# ===============================
+# Environment & Secrets
+# ===============================
+.env
+.env.local
+.env.*.local
+application-local.properties
+application-dev.properties
+application-prod.properties
+
+# ===============================
+# Documentation (Optional)
+# ===============================
+HELP.md
+
+# ===============================
+# Nested Git Repositories
+# ===============================
+**/.git/
+.git/
+*/.git/*
