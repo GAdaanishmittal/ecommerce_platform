@@ -38,6 +38,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/cart/**").hasAnyRole("CUSTOMER", "ADMIN")
                 .requestMatchers("/api/orders/checkout").hasAnyRole("CUSTOMER", "ADMIN")
                 .requestMatchers("/api/orders/my").hasAnyRole("CUSTOMER", "ADMIN")
+                .requestMatchers("/api/payments/**").hasAnyRole("CUSTOMER", "ADMIN")
 
                 // admin only
                 .requestMatchers("/api/orders/all").hasRole("ADMIN")

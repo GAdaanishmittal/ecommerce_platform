@@ -46,3 +46,17 @@ jwt.expiration=3600000
 management.endpoints.web.exposure.include=health,info,metrics
 management.endpoint.health.show-details=always
 management.info.env.enabled=true
+
+# ===============================
+# RAZORPAY PAYMENT GATEWAY
+# ===============================
+# Get your keys from: https://dashboard.razorpay.com/app/keys
+# For testing: Use test keys (starts with rzp_test_)
+# For production: Use live keys (starts with rzp_live_)
+razorpay.key.id=rzp_test_YOUR_KEY_ID_HERE
+razorpay.key.secret=YOUR_KEY_SECRET_HERE
+
+# Demo Mode: Set to 'true' to bypass Razorpay and simulate payments (for development/testing)
+# Set to 'false' to use actual Razorpay gateway (for production)
+payment.demo.mode=true
+

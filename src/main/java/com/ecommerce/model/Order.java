@@ -13,12 +13,13 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
 
-    private double totalAmount;
+    private java.math.BigDecimal totalAmount;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;  // Shipment status: PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
 
     private String paymentStatus;  // Payment status: PENDING, SUCCESS, FAILED
+    private String razorpayOrderId;
 
     private LocalDateTime orderDate;
     private String shippingAddress;
@@ -45,11 +46,11 @@ public class Order {
         this.orderId = orderId;
     }
 
-    public double getTotalAmount() {
+    public java.math.BigDecimal getTotalAmount() {
         return totalAmount;
     }
 
-    public void setTotalAmount(double totalAmount) {
+    public void setTotalAmount(java.math.BigDecimal totalAmount) {
         this.totalAmount = totalAmount;
     }
 
@@ -107,5 +108,13 @@ public class Order {
 
     public void setPaymentStatus(String paymentStatus) {
         this.paymentStatus = paymentStatus;
+    }
+
+    public String getRazorpayOrderId() {
+        return razorpayOrderId;
+    }
+
+    public void setRazorpayOrderId(String razorpayOrderId) {
+        this.razorpayOrderId = razorpayOrderId;
     }
 }

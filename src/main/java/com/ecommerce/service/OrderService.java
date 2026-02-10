@@ -8,17 +8,18 @@ import com.ecommerce.model.Order;
 import com.ecommerce.model.OrderItem;
 import com.ecommerce.model.OrderStatus;
 import com.ecommerce.model.Product;
-import com.ecommerce.model.Transaction;
 import com.ecommerce.model.User;
+import com.ecommerce.model.Transaction; // Added import
 import com.ecommerce.repository.CartItemRepository;
 import com.ecommerce.repository.CartRepository;
 import com.ecommerce.repository.OrderItemRepository;
 import com.ecommerce.repository.OrderRepository;
 import com.ecommerce.repository.ProductRepository;
-import com.ecommerce.repository.TransactionRepository;
+import com.ecommerce.repository.TransactionRepository; // Added import
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal; // Added import for Order totalAmount
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,20 +33,20 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
-    private final TransactionRepository transactionRepository;
+    private final TransactionRepository transactionRepository; // Injected
 
     public OrderService(CartRepository cartRepository,
                         CartItemRepository cartItemRepository,
                         OrderRepository orderRepository,
                         OrderItemRepository orderItemRepository,
                         ProductRepository productRepository,
-                        TransactionRepository transactionRepository) {
+                        TransactionRepository transactionRepository) { // Injected
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.productRepository = productRepository;
-        this.transactionRepository = transactionRepository;
+        this.transactionRepository = transactionRepository; // Injected
     }
 
     @Transactional
@@ -64,9 +65,9 @@ public class OrderService {
         order.setPaymentStatus("PENDING");  // Payment status - initially pending
         order.setOrderDate(LocalDateTime.now());
         order.setShippingAddress(user.getAddress());
-        order = orderRepository.save(order);
+        // order = orderRepository.save(order); // Removed this save
 
-        double total = 0;
+        double total = 0; // Reverted to double
 
         for (CartItem ci : cartItems) {
             Product p = ci.getProduct();
@@ -83,18 +84,18 @@ public class OrderService {
             oi.setProduct(p);
             oi.setQty(ci.getQty());
             oi.setPriceAtPurchase(ci.getPriceAtAdd());
-            oi.setSubtotal(ci.getQty() * ci.getPriceAtAdd());
+            oi.setSubtotal(ci.getQty() * ci.getPriceAtAdd()); // Reverted calculation to use double
 
-            total += oi.getSubtotal();
+            total += oi.getSubtotal(); // Reverted to double arithmetic
             orderItemRepository.save(oi);
         }
 
-        order.setTotalAmount(total);
-        orderRepository.save(order);
+        order.setTotalAmount(BigDecimal.valueOf(total)); // Convert to BigDecimal for Order's totalAmount
+        order = orderRepository.save(order); // Moved save here
 
         Transaction tx = new Transaction();
         tx.setUser(user);
-        tx.setAmount(total);
+        tx.setAmount(total); // total is now double, so this is correct
         tx.setPaymentMode("COD");
         tx.setPaymentStatus("SUCCESS");
         tx.setTransactionDate(LocalDateTime.now());
@@ -134,7 +135,7 @@ public class OrderService {
     private OrderResponse mapToResponse(Order order) {
         OrderResponse response = new OrderResponse();
         response.setOrderId(order.getOrderId());
-        response.setTotalAmount(order.getTotalAmount());
+        response.setTotalAmount(order.getTotalAmount().doubleValue());
         response.setStatus(order.getStatus().name());  // Shipment status
         response.setPaymentStatus(order.getPaymentStatus() != null ? order.getPaymentStatus() : "PENDING");  // Payment status
 

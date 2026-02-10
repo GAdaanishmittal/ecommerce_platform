@@ -119,4 +119,12 @@ public class CartService {
 
         cartItemRepository.delete(item);
     }
+
+    public void clearCart(Long userId) {
+        cartRepository.findByUser_UserId(userId).ifPresent(cart -> {
+            cartItemRepository.deleteAll(cartItemRepository.findByCart_CartId(cart.getCartId()));
+            // Optionally, delete the cart itself if it should not exist when empty
+            // cartRepository.delete(cart);
+        });
+    }
 }

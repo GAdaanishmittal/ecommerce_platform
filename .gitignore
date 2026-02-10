@@ -2,6 +2,7 @@
 # FRONTEND - DO NOT COMMIT
 # ===============================
 frontend/
+!frontend/streamlit/streamlit_app.py
 
 # ===============================
 # Maven Build
@@ -109,6 +110,11 @@ spring.log
 application-local.properties
 application-dev.properties
 application-prod.properties
+
+# Ignore main application.properties to prevent committing sensitive data
+# (Razorpay keys, database credentials, JWT secrets, etc.)
+src/main/resources/application.properties
+target/classes/application.properties
 
 # ===============================
 # Documentation (Optional)

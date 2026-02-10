@@ -2321,14 +2321,30 @@ public class DataSeeder {
 - **PostgreSQL** - Download from [PostgreSQL](https://www.postgresql.org/download/)
 - **IDE** - IntelliJ IDEA, Eclipse, or VS Code
 
-### 16.2 Database Setup
+### 16.2 Security Configuration Setup
+
+⚠️ **IMPORTANT:** Before running the application, set up your configuration file:
+
+```bash
+# Copy the example configuration
+cp application.properties.example src/main/resources/application.properties
+
+# Edit the file and update:
+# - Database credentials
+# - JWT secret (generate using: openssl rand -base64 64)
+# - Razorpay API keys (get from https://dashboard.razorpay.com/app/keys)
+```
+
+**See [SECURITY.md](SECURITY.md) for detailed setup instructions.**
+
+### 16.3 Database Setup
 
 ```sql
 -- Connect to PostgreSQL and create database
 CREATE DATABASE ecommerce_db;
 ```
 
-### 16.3 Run the Application
+### 16.4 Run the Application
 
 ```bash
 # Clone the repository
@@ -2345,7 +2361,7 @@ mvn spring-boot:run
 java -jar target/Ecommerce-0.0.1-SNAPSHOT.jar
 ```
 
-### 16.4 Verify It's Running
+### 16.5 Verify It's Running
 
 ```bash
 # Check health endpoint
