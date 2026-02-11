@@ -1,8 +1,8 @@
 # ===============================
 # FRONTEND - DO NOT COMMIT
 # ===============================
-frontend/
-!frontend/streamlit/streamlit_app.py
+#frontend/
+#!frontend/streamlit/streamlit_app.py
 
 # ===============================
 # Maven Build
