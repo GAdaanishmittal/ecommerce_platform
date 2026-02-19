@@ -33,6 +33,28 @@ public class ProductController {
         return ResponseEntity.ok(productService.getAllProducts());
     }
 
+    // PUBLIC: get single product
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.getProductById(id));
+    }
+
+    // ADMIN: update product
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id, 
+                                                        @Valid @RequestBody ProductRequest request) {
+        return ResponseEntity.ok(productService.updateProduct(id, request));
+    }
+
+    // ADMIN: delete product
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+        productService.deleteProduct(id);
+        return ResponseEntity.noContent().build();
+    }
+
     // PUBLIC: products by category
     @GetMapping("/category/{id}")
     public ResponseEntity<List<ProductResponse>> getByCategory(@PathVariable Long id) {

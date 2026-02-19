@@ -143,7 +143,10 @@ public class PaymentService {
                 transaction.setPaymentStatus("SUCCESS");
                 transaction.setAmount(order.getTotalAmount().doubleValue());
                 transaction.setTransactionDate(LocalDateTime.now()); // Transaction timestamp with date and time
-                transactionRepository.save(transaction);
+                transaction = transactionRepository.save(transaction);
+
+                order.setTransaction(transaction);
+                orderRepository.save(order);
             } else {
                 order.setPaymentStatus("FAILED");
                 orderRepository.save(order);
@@ -175,7 +178,10 @@ public class PaymentService {
         transaction.setPaymentStatus("SUCCESS");
         transaction.setAmount(order.getTotalAmount().doubleValue());
         transaction.setTransactionDate(LocalDateTime.now()); // Transaction timestamp with date and time
-        transactionRepository.save(transaction);
+        transaction = transactionRepository.save(transaction);
+
+        order.setTransaction(transaction);
+        orderRepository.save(order);
 
         return "demo_payment_success";
     }

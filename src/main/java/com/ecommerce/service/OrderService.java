@@ -95,11 +95,12 @@ public class OrderService {
 
         Transaction tx = new Transaction();
         tx.setUser(user);
+        tx.setOrder(order); // Explicitly link order to transaction
         tx.setAmount(total); // total is now double, so this is correct
         tx.setPaymentMode("COD");
         tx.setPaymentStatus("SUCCESS");
         tx.setTransactionDate(LocalDateTime.now());
-        transactionRepository.save(tx);
+        tx = transactionRepository.save(tx);
 
         order.setTransaction(tx);
         orderRepository.save(order);
@@ -111,17 +112,23 @@ public class OrderService {
     }
 
     public List<OrderResponse> getOrdersForUser(User user) {
-        return orderRepository.findByUser_UserId(user.getUserId())
+        return orderRepository.findByUser_UserIdOrderByOrderIdDesc(user.getUserId())
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     public List<OrderResponse> getAllOrders() {
-        return orderRepository.findAll()
+        return orderRepository.findAllByOrderByOrderIdDesc()
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    public OrderResponse getOrderById(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+        return mapToResponse(order);
     }
 
     public OrderResponse updateStatus(Long orderId, OrderStatus status) {
@@ -138,6 +145,24 @@ public class OrderService {
         response.setTotalAmount(order.getTotalAmount().doubleValue());
         response.setStatus(order.getStatus().name());  // Shipment status
         response.setPaymentStatus(order.getPaymentStatus() != null ? order.getPaymentStatus() : "PENDING");  // Payment status
+        response.setOrderDate(order.getOrderDate() != null ? order.getOrderDate() : java.time.LocalDateTime.now());
+        if (order.getUser() != null) {
+            response.setUserId(order.getUser().getUserId());
+            response.setUserEmail(order.getUser().getEmail());
+        }
+
+        var txn = order.getTransaction();
+        if (txn == null) {
+            txn = transactionRepository.findByOrder_OrderId(order.getOrderId()).orElse(null);
+        }
+
+        if (txn != null) {
+            response.setPaymentMode(txn.getPaymentMode());
+            response.setTransactionRef(txn.getPaymentGatewayRef());
+            response.setTransactionStatus(txn.getPaymentStatus());
+            response.setTransactionId(txn.getTransactionId());
+            response.setTransactionDate(txn.getTransactionDate());
+        }
 
         try {
             // Safely retrieve order items using repository with fetch join

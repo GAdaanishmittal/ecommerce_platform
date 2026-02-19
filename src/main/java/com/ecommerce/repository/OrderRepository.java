@@ -8,7 +8,11 @@ import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    List<Order> findByUser_UserId(Long userId);
+    @org.springframework.data.jpa.repository.Query("SELECT o FROM Order o WHERE o.user.userId = :userId ORDER BY o.orderId DESC")
+    List<Order> findByUser_UserIdOrderByOrderIdDesc(@org.springframework.data.repository.query.Param("userId") Long userId);
 
     Optional<Order> findByRazorpayOrderId(String razorpayOrderId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT o FROM Order o ORDER BY o.orderId DESC")
+    List<Order> findAllByOrderByOrderIdDesc();
 }

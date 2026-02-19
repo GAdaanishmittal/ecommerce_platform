@@ -45,6 +45,40 @@ public class ProductService {
         return mapToResponse(saved);
     }
 
+    public ProductResponse getProductById(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found with ID: " + id));
+        return mapToResponse(product);
+    }
+
+    @CacheEvict(value = "products", allEntries = true)
+    public ProductResponse updateProduct(Long id, ProductRequest request) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found with ID: " + id));
+
+        ProductCategory category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        product.setProductName(request.getProductName());
+        product.setProductDescription(request.getProductDescription());
+        product.setSku(request.getSku());
+        product.setPicture(request.getPicture());
+        product.setBasePrice(request.getBasePrice());
+        product.setStockQty(request.getStockQty());
+        product.setCategory(category);
+
+        Product updated = productRepository.save(product);
+        return mapToResponse(updated);
+    }
+
+    @CacheEvict(value = "products", allEntries = true)
+    public void deleteProduct(Long id) {
+        if (!productRepository.existsById(id)) {
+            throw new RuntimeException("Product not found with ID: " + id);
+        }
+        productRepository.deleteById(id);
+    }
+
     @Cacheable("products")
     public List<ProductResponse> getAllProducts() {
         return productRepository.findAll()
