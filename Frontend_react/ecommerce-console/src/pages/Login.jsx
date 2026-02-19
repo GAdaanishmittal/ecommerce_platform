@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import Input from '../components/ui/Input';
 
 const Login = () => {
   const [email, setEmail] = useState('daanish@example.com');
@@ -19,10 +20,7 @@ const Login = () => {
       await login(email, password);
       navigate('/products');
     } catch (err) {
-      const msg =
-        err.response?.data?.message ||
-        err.response?.data ||
-        'Login failed. Check credentials.';
+      const msg = err.response?.data?.message || err.response?.data || 'Login failed. Check credentials.';
       setError(typeof msg === 'string' ? msg : JSON.stringify(msg));
     } finally {
       setLoading(false);
@@ -31,50 +29,44 @@ const Login = () => {
 
   return (
     <div className="login-page">
-      <div className="card login-card">
-        <h2 className="login-title">Ecommerce Console</h2>
-        <p className="login-subtitle">
-          Sign in to your account
-        </p>
+      <div className="login-card">
+        <h2 className="login-title">EC_SYS</h2>
+        <p className="auth-subtitle mono">Unauthorized access prohibited</p>
 
         <form onSubmit={handleLogin}>
           <div className="form-group">
-            <label className="form-label">Email</label>
-            <input
+            <Input
+              label="Identity"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              placeholder="uid@domain.com"
               required
             />
           </div>
 
           <div className="form-group">
-            <label className="form-label">
-              Password
-            </label>
-            <input
+            <Input
+              label="Passcode"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
+              placeholder="********"
               required
             />
           </div>
 
-          {error && (
-            <div style={{ color: 'var(--error-color)', marginBottom: '1rem', padding: '0.5rem', background: 'rgba(239, 68, 68, 0.1)', borderRadius: 'var(--radius-sm)' }}>
-              {error}
-            </div>
-          )}
+          {error && <div className="status-box mb-4">ERR: {error}</div>}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="login-btn"
-          >
-            {loading ? 'Logging in…' : 'Login'}
+          <button type="submit" disabled={loading} className="login-btn">
+            {loading ? '...' : 'AUTHENTICATE'}
           </button>
+
+          <div className="mt-4 text-center">
+            <Link to="/createuser" className="mono section-meta">
+              GENERATE_NEW_IDENTITY
+            </Link>
+          </div>
         </form>
       </div>
     </div>

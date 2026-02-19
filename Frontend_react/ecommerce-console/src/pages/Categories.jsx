@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import api from '../api/client';
+import ErrorMessage from '../components/ui/ErrorMessage';
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
@@ -13,7 +14,9 @@ const Categories = () => {
   const fetchCategories = async () => {
     try {
       const response = await api.get('/api/categories');
-      setCategories(response.data);
+      const data = Array.isArray(response.data) ? response.data : [];
+      data.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      setCategories(data);
     } catch (err) {
       console.error(err);
       setError('Failed to fetch categories');
@@ -22,32 +25,37 @@ const Categories = () => {
     }
   };
 
-  if (loading) return <div style={{ padding: '20px' }}>Loading categories...</div>;
-  if (error) return <div style={{ padding: '20px', color: 'red' }}>{error}</div>;
+  if (loading) return <div className="empty-state mono">Loading categories...</div>;
+  if (error) return <ErrorMessage message={error} />;
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h2>Categories</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px' }}>
-        {categories.map((cat) => (
-          <div key={cat.categoryId} style={{ border: '1px solid #ddd', borderRadius: '8px', overflow: 'hidden' }}>
-             {/* Placeholder for image if picture URL is valid, else fallback */}
-             <div style={{ height: '150px', backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {cat.picture ? (
-                    <img src={cat.picture} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                         onError={(e) => {e.target.onerror = null; e.target.style.display='none'; e.target.parentNode.innerText = cat.name;}}
-                    />
-                ) : (
-                    <span style={{ fontSize: '1.2em', color: '#888' }}>{cat.name}</span>
-                )}
-             </div>
-            <div style={{ padding: '15px' }}>
-              <h3 style={{ margin: '0 0 10px 0' }}>{cat.name}</h3>
-              <p style={{ margin: 0, color: '#666' }}>{cat.description}</p>
-            </div>
-          </div>
-        ))}
+    <div className="container">
+      <div className="section-header">
+        <h2 className="section-title">Categories</h2>
+        <span className="mono section-meta">COUNT: {categories.length}</span>
       </div>
+
+      {categories.length === 0 ? (
+        <div className="empty-state mono">No categories available</div>
+      ) : (
+        <div className="categories-grid">
+          {categories.map((cat) => (
+            <div key={cat.categoryId} className="category-card">
+              <div className="category-media">
+                {cat.picture ? (
+                  <img src={cat.picture} alt={cat.name} onError={(e) => { e.target.style.display = 'none'; }} />
+                ) : (
+                  <span className="mono section-meta">NULL_IMG</span>
+                )}
+              </div>
+              <div className="category-copy">
+                <h3>{cat.name}</h3>
+                <p>{cat.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/client';
+import Input from '../components/ui/Input';
+import TextArea from '../components/ui/TextArea';
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -13,7 +15,7 @@ const AddProduct = () => {
     basePrice: '',
     stockQty: '',
     categoryId: '',
-    imageUrl: ''
+    picture: '',
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -23,20 +25,19 @@ const AddProduct = () => {
       try {
         const [catRes, prodRes] = await Promise.all([
           api.get('/api/categories'),
-          api.get('/api/products')
+          api.get('/api/products'),
         ]);
-        
-        setCategories(catRes.data);
-        
-        // Calculate next ID for SKU
+
+        const catData = Array.isArray(catRes.data) ? catRes.data : [];
+        catData.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        setCategories(catData);
+
         const products = Array.isArray(prodRes.data) ? prodRes.data : [];
-        const nextId = products.length > 0 
-          ? Math.max(...products.map(p => p.productId || 0)) + 1 
-          : 1;
-        
-        setFormData(prev => ({
+        const nextId = products.length > 0 ? Math.max(...products.map((p) => p.productId || 0)) + 1 : 1;
+
+        setFormData((prev) => ({
           ...prev,
-          sku: `PROD-${nextId.toString().padStart(3, '0')}`
+          sku: `PROD-${nextId.toString().padStart(3, '0')}`,
         }));
       } catch (err) {
         console.error('Failed to fetch initial data', err);
@@ -57,35 +58,31 @@ const AddProduct = () => {
     setSuccess('');
 
     try {
-      // Validate inputs
       if (!formData.productName || !formData.sku || !formData.basePrice || !formData.categoryId) {
-        throw new Error('Please fill in all required fields (Name, SKU, Price, Category)');
+        throw new Error('Please fill all required fields (Name, SKU, Price, Category)');
       }
 
       const payload = {
         productName: formData.productName,
         sku: formData.sku,
         productDescription: formData.productDescription || null,
-        description: formData.productDescription || null, 
+        description: formData.productDescription || null,
         basePrice: parseFloat(formData.basePrice),
-        price: parseFloat(formData.basePrice), 
-        stockQty: parseInt(formData.stockQty) || 0,
-        quantity: parseInt(formData.stockQty) || 0,
-        categoryId: parseInt(formData.categoryId), // Flat ID
+        price: parseFloat(formData.basePrice),
+        stockQty: parseInt(formData.stockQty, 10) || 0,
+        quantity: parseInt(formData.stockQty, 10) || 0,
+        categoryId: parseInt(formData.categoryId, 10),
         category: {
-          categoryId: parseInt(formData.categoryId) // Nested object
+          categoryId: parseInt(formData.categoryId, 10),
         },
-        imageUrl: formData.imageUrl || null
+        picture: formData.picture || null,
       };
 
-      console.log('Sending payload:', payload);
       await api.post('/api/products', payload);
-      setSuccess('Product added successfully!');
-      setTimeout(() => navigate('/products'), 1500);
+      setSuccess('Product added successfully');
+      setTimeout(() => navigate('/products'), 1200);
     } catch (err) {
       console.error('Error adding product:', err);
-      
-      // Handle detailed validation errors if provided by the backend
       let errorMsg = 'Failed to add product';
       if (err.response?.data) {
         const data = err.response.data;
@@ -94,15 +91,13 @@ const AddProduct = () => {
         } else if (data.message) {
           errorMsg = data.message;
         } else if (data.errors && Array.isArray(data.errors)) {
-          // Spring Boot often returns errors array
-          errorMsg = data.errors.map(e => e.defaultMessage || e).join(', ');
+          errorMsg = data.errors.map((entry) => entry.defaultMessage || entry).join(', ');
         } else if (typeof data === 'object') {
           errorMsg = JSON.stringify(data);
         }
       } else {
         errorMsg = err.message;
       }
-      
       setError(errorMsg);
     } finally {
       setLoading(false);
@@ -110,58 +105,44 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="container mt-4" style={{ maxWidth: '600px' }}>
-      <button onClick={() => navigate('/products')} className="secondary mb-4">&larr; Back to Products</button>
-      
-      <div className="card">
-        <h2 className="mb-4">Add New Product</h2>
-        
-        {error && (
-          <div style={{ color: 'var(--error-color)', padding: '1rem', background: 'rgba(239, 68, 68, 0.1)', borderRadius: 'var(--radius-md)', marginBottom: '1rem' }}>
-            {error}
-          </div>
-        )}
-        
-        {success && (
-          <div style={{ color: 'var(--success-color)', padding: '1rem', background: 'rgba(34, 197, 94, 0.1)', borderRadius: 'var(--radius-md)', marginBottom: '1rem' }}>
-            {success}
-          </div>
-        )}
+    <div className="editor-shell">
+      <button onClick={() => navigate('/products')} className="back-link mono">
+        &larr; Back to directory
+      </button>
 
-        <form onSubmit={handleSubmit}>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
-            <div className="form-group">
-              <label className="form-label">Product Name *</label>
-              <input
-                name="productName"
-                value={formData.productName}
-                onChange={handleChange}
-                placeholder="e.g. Wireless Headphones"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">SKU *</label>
-              <input
-                name="sku"
-                value={formData.sku}
-                onChange={handleChange}
-                placeholder="PROD-123"
-                required
-              />
-            </div>
+      <div className="editor-form">
+        <div className="section-header">
+          <h2 className="section-title">New Entry</h2>
+        </div>
+
+        {error && <div className="status-box mb-4">ERR: {error}</div>}
+        {success && <div className="status-box mb-4">STATUS: {success}</div>}
+
+        <form onSubmit={handleSubmit} className="stack">
+          <div className="grid-wide">
+            <Input
+              label="Name"
+              name="productName"
+              value={formData.productName}
+              onChange={handleChange}
+              placeholder="NAME"
+              required
+            />
+            <Input
+              label="SKU"
+              name="sku"
+              value={formData.sku}
+              onChange={handleChange}
+              placeholder="SKU"
+              required
+            />
           </div>
 
           <div className="form-group">
-            <label className="form-label">Category *</label>
-            <select
-              name="categoryId"
-              value={formData.categoryId}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select a category</option>
-              {categories.map(cat => (
+            <label className="field-label">Category *</label>
+            <select name="categoryId" value={formData.categoryId} onChange={handleChange} required>
+              <option value="">SELECT</option>
+              {categories.map((cat) => (
                 <option key={cat.categoryId} value={cat.categoryId}>
                   {cat.name}
                 </option>
@@ -169,59 +150,46 @@ const AddProduct = () => {
             </select>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            <div className="form-group">
-              <label className="form-label">Price (₹) *</label>
-              <input
-                type="number"
-                name="basePrice"
-                value={formData.basePrice}
-                onChange={handleChange}
-                placeholder="0.00"
-                step="0.01"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Stock Quantity</label>
-              <input
-                type="number"
-                name="stockQty"
-                value={formData.stockQty}
-                onChange={handleChange}
-                placeholder="0"
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Image URL</label>
-            <input
-              name="imageUrl"
-              value={formData.imageUrl}
+          <div className="grid-two">
+            <Input
+              label="Price (INR)"
+              type="number"
+              name="basePrice"
+              value={formData.basePrice}
               onChange={handleChange}
-              placeholder="https://example.com/image.jpg"
+              placeholder="0.00"
+              step="0.01"
+              required
+            />
+            <Input
+              label="Stock"
+              type="number"
+              name="stockQty"
+              value={formData.stockQty}
+              onChange={handleChange}
+              placeholder="0"
             />
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Description</label>
-            <textarea
-              name="productDescription"
-              value={formData.productDescription}
-              onChange={handleChange}
-              placeholder="Describe the product..."
-              rows="4"
-              style={{ width: '100%', resize: 'vertical' }}
-            />
-          </div>
+          <Input
+            label="Image URL"
+            name="picture"
+            value={formData.picture}
+            onChange={handleChange}
+            placeholder="https://..."
+          />
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{ width: '100%', marginTop: '1rem', padding: '1rem' }}
-          >
-            {loading ? 'Adding Product...' : 'Add Product'}
+          <TextArea
+            label="Description"
+            name="productDescription"
+            value={formData.productDescription}
+            onChange={handleChange}
+            placeholder="DESC"
+            rows="4"
+          />
+
+          <button type="submit" disabled={loading} className="w-full">
+            {loading ? '...' : 'GENERATE'}
           </button>
         </form>
       </div>

@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/client';
+import { useAuth } from '../context/AuthContext';
+import { formatCurrency } from '../utils/formatters';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -31,7 +34,7 @@ const ProductDetail = () => {
     try {
       await api.post('/api/cart/add', {
         productId: product.productId,
-        qty: 1
+        qty: 1,
       });
       navigate('/cart');
     } catch (err) {
@@ -42,55 +45,55 @@ const ProductDetail = () => {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error || !product) return <div>{error || 'Product not found'}</div>;
+  if (loading) return <div className="empty-state mono">Loading...</div>;
+  if (error || !product) return <div className="status-box">{error || 'Product not found'}</div>;
 
   return (
-    <div>
-      <button onClick={() => navigate('/products')} className="secondary mb-4">&larr; Back to Products</button>
-      
+    <div className="container">
+      <button onClick={() => navigate('/products')} className="back-link mono">
+        &larr; Back to directory
+      </button>
+
       <div className="product-detail-container">
         <div className="product-detail-image">
-          {product.imageUrl ? (
-              <img src={product.imageUrl} alt={product.productName} />
+          {product.picture ? (
+            <img src={product.picture} alt={product.productName} />
           ) : (
-              <span style={{ color: 'var(--text-secondary)', fontSize: '1.5rem' }}>No Image Available</span>
+            <div className="mono section-meta">NO_IMAGE</div>
           )}
         </div>
-        
+
         <div className="product-detail-info">
           <h1>{product.productName}</h1>
-          <div className="product-detail-price">₹{product.basePrice || product.price}</div>
-          <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+          <div className="product-detail-price mono">{formatCurrency(product.basePrice || product.price)}</div>
+
+          <div className="detail-strip">
             {product.description || product.productDescription}
-          </p>
-          
-          <div className="product-meta">
-            <p><strong>Category:</strong> {product.categoryName || product.category?.categoryName || 'General'}</p>
-            <p><strong>Stock:</strong> {product.stockQty || product.quantity}</p>
           </div>
 
-          <div className="flex gap-4">
-            <button 
-              onClick={addToCart}
-              disabled={adding}
-              className="add-to-cart-btn"
-              style={{ flex: 2 }}
-            >
-              {adding ? 'Adding...' : 'Add to Cart'}
+          <div className="detail-grid">
+            <div>
+              <span className="detail-label">Category</span>
+              <div className="detail-value mono">{product.categoryName || product.category?.categoryName || 'GENERAL'}</div>
+            </div>
+            <div>
+              <span className="detail-label">Stock</span>
+              <div className="detail-value mono">{product.stockQty || product.quantity} UNITS</div>
+            </div>
+          </div>
+
+          <div className="detail-action-row">
+            <button onClick={addToCart} disabled={adding}>
+              {adding ? '...' : 'ADD_TO_BAG'}
             </button>
-            <button 
-              onClick={() => navigate(`/products/${id}/edit`)}
-              className="secondary"
-              style={{ flex: 1, padding: '1rem' }}
-            >
-              Edit Product
-            </button>
+            {isAdmin && (
+              <button onClick={() => navigate(`/products/${id}/edit`)} className="secondary">
+                EDIT
+              </button>
+            )}
           </div>
         </div>
       </div>
-
-      {/* Reviews Section Placeholder - could integrate Reviews component here */}
     </div>
   );
 };
