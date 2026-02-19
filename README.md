@@ -1,8 +1,8 @@
 # 🛒 Ecommerce Project - Complete Spring Boot Learning Guide
 
-> **A comprehensive, production-ready REST API for an e-commerce platform built with Spring Boot 4.x and Java 21**
+> **A comprehensive, production-ready e-commerce platform built with Spring Boot 4.x and Java 21**
 
-This documentation is designed to help you learn Spring Boot through a real-world project. Every concept, annotation, and design decision is explained in detail.
+This documentation has every concept, annotation, and design decision is explained in detail according to the design provided.
 
 ---
 
