@@ -48,10 +48,16 @@ public class PaymentService {
 
     @PostConstruct
     public void init() {
-        try {
-            this.razorpayClient = new RazorpayClient(razorpayKeyId, razorpayKeySecret);
-        } catch (RazorpayException e) {
-            throw new RuntimeException("Failed to initialize RazorpayClient", e);
+        if (!demoMode) {
+            try {
+                if (razorpayKeyId == null || razorpayKeyId.isEmpty() ||
+                    razorpayKeySecret == null || razorpayKeySecret.isEmpty()) {
+                    throw new RuntimeException("Razorpay credentials not configured. Set razorpay.key.id and razorpay.key.secret in application.properties or use demo mode");
+                }
+                this.razorpayClient = new RazorpayClient(razorpayKeyId, razorpayKeySecret);
+            } catch (RazorpayException e) {
+                throw new RuntimeException("Failed to initialize RazorpayClient: " + e.getMessage(), e);
+            }
         }
     }
 
@@ -128,21 +134,23 @@ public class PaymentService {
                 order.setStatus(OrderStatus.CONFIRMED);
                 orderRepository.save(order);
 
+                // Create transaction with complete details and timestamp
                 Transaction transaction = new Transaction();
                 transaction.setOrder(order);
+                transaction.setUser(order.getUser());
                 transaction.setPaymentGatewayRef(razorpayPaymentId);
                 transaction.setPaymentMode("Razorpay");
                 transaction.setPaymentStatus("SUCCESS");
                 transaction.setAmount(order.getTotalAmount().doubleValue());
-                transaction.setTransactionDate(LocalDateTime.now());
+                transaction.setTransactionDate(LocalDateTime.now()); // Transaction timestamp with date and time
                 transactionRepository.save(transaction);
             } else {
                 order.setPaymentStatus("FAILED");
                 orderRepository.save(order);
-                throw new RuntimeException("Payment verification failed");
+                throw new RuntimeException("Payment verification failed: Invalid signature from Razorpay");
             }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to verify payment", e);
+            throw new RuntimeException("Failed to verify payment: " + e.getMessage(), e);
         }
     }
 
@@ -158,13 +166,15 @@ public class PaymentService {
         order.setStatus(OrderStatus.CONFIRMED);
         orderRepository.save(order);
 
+        // Create transaction with complete details and timestamp for demo mode
         Transaction transaction = new Transaction();
         transaction.setOrder(order);
+        transaction.setUser(order.getUser());
         transaction.setPaymentGatewayRef("DEMO_TRANSACTION_" + orderId);
         transaction.setPaymentMode("DEMO");
         transaction.setPaymentStatus("SUCCESS");
         transaction.setAmount(order.getTotalAmount().doubleValue());
-        transaction.setTransactionDate(LocalDateTime.now());
+        transaction.setTransactionDate(LocalDateTime.now()); // Transaction timestamp with date and time
         transactionRepository.save(transaction);
 
         return "demo_payment_success";

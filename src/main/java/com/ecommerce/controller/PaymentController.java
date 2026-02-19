@@ -2,18 +2,22 @@ package com.ecommerce.controller;
 
 import com.ecommerce.dto.PaymentRequest;
 import com.ecommerce.dto.PaymentResponse;
+import com.ecommerce.model.Transaction;
+import com.ecommerce.repository.TransactionRepository;
 import com.ecommerce.service.PaymentService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/payments")
 public class PaymentController {
 
     private final PaymentService paymentService;
+    private final TransactionRepository transactionRepository;
 
     @Value("${razorpay.key.id}")
     private String razorpayKeyId;
@@ -21,8 +25,9 @@ public class PaymentController {
     @Value("${payment.demo.mode:false}")
     private boolean demoMode;
 
-    public PaymentController(PaymentService paymentService) {
+    public PaymentController(PaymentService paymentService, TransactionRepository transactionRepository) {
         this.paymentService = paymentService;
+        this.transactionRepository = transactionRepository;
     }
 
     /**
@@ -30,24 +35,32 @@ public class PaymentController {
      */
     @PostMapping
     public ResponseEntity<?> pay(@RequestBody PaymentRequest request) {
-        String result = paymentService.pay(request.getOrderId(), request.getPaymentMode());
+        try {
+            String result = paymentService.pay(request.getOrderId(), request.getPaymentMode());
 
-        if (demoMode) {
-            // Demo mode - payment completed immediately
-            return ResponseEntity.ok(new PaymentResponse("SUCCESS", "Demo payment completed", result, null, null));
-        } else {
-            // Razorpay mode - return order ID for frontend to complete payment
-            return ResponseEntity.ok(Map.of(
-                "status", "RAZORPAY_ORDER_CREATED",
-                "razorpayOrderId", result,
-                "razorpayKeyId", razorpayKeyId,
-                "message", "Complete payment using Razorpay checkout"
+            if (demoMode) {
+                // Demo mode - payment completed immediately
+                return ResponseEntity.ok(new PaymentResponse("SUCCESS", "Demo payment completed successfully", result, null, null));
+            } else {
+                // Razorpay mode - return order ID for frontend to complete payment
+                return ResponseEntity.ok(Map.of(
+                    "status", "RAZORPAY_ORDER_CREATED",
+                    "razorpayOrderId", result,
+                    "razorpayKeyId", razorpayKeyId,
+                    "message", "Complete payment using Razorpay checkout",
+                    "orderId", request.getOrderId()
+                ));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "status", "ERROR",
+                "message", e.getMessage()
             ));
         }
     }
 
     /**
-     * Verify Razorpay payment after completion
+     * Verify Razorpay payment after completion and return confirmation
      */
     @PostMapping("/verify")
     public ResponseEntity<PaymentResponse> verifyPayment(@RequestBody Map<String, String> payload) {
@@ -57,9 +70,33 @@ public class PaymentController {
 
         try {
             paymentService.verifyPayment(razorpayOrderId, razorpayPaymentId, razorpaySignature);
-            return ResponseEntity.ok(new PaymentResponse("SUCCESS", "Payment verified successfully", razorpayOrderId, razorpayPaymentId, razorpaySignature));
+
+            // Fetch transaction details for confirmation response
+            Optional<Transaction> transaction = transactionRepository.findByPaymentGatewayRef(razorpayPaymentId);
+
+            if (transaction.isPresent()) {
+                Transaction txn = transaction.get();
+                return ResponseEntity.ok(new PaymentResponse(
+                    "SUCCESS",
+                    "Payment verified and confirmed successfully",
+                    razorpayOrderId,
+                    razorpayPaymentId,
+                    razorpaySignature,
+                    txn.getTransactionDate(),
+                    txn.getAmount(),
+                    txn.getTransactionId().toString()
+                ));
+            } else {
+                return ResponseEntity.ok(new PaymentResponse(
+                    "SUCCESS",
+                    "Payment verified successfully",
+                    razorpayOrderId,
+                    razorpayPaymentId,
+                    razorpaySignature
+                ));
+            }
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new PaymentResponse("FAILED", e.getMessage()));
+            return ResponseEntity.badRequest().body(new PaymentResponse("FAILED", "Payment verification failed: " + e.getMessage()));
         }
     }
 
@@ -68,8 +105,15 @@ public class PaymentController {
      */
     @GetMapping("/status/{orderId}")
     public ResponseEntity<?> getPaymentStatus(@PathVariable Long orderId) {
-        Map<String, Object> status = paymentService.getPaymentStatus(orderId);
-        return ResponseEntity.ok(status);
+        try {
+            Map<String, Object> status = paymentService.getPaymentStatus(orderId);
+            return ResponseEntity.ok(status);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "status", "ERROR",
+                "message", e.getMessage()
+            ));
+        }
     }
 
     /**

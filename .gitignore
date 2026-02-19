@@ -108,7 +108,7 @@ spring.log
 .env.local
 .env.*.local
 application-local.properties
-application-dev.properties
+*.properties
 application-prod.properties
 
 # Ignore main application.properties to prevent committing sensitive data
