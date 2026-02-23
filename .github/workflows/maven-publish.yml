@@ -3,7 +3,7 @@ name: Build Jar on Push
 on:
   push:
     branches:
-      - master   # change if your branch is different
+      - GARC   # change if your branch is different
 
 jobs:
   build:
