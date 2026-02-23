@@ -4,10 +4,13 @@ on:
   push:
     branches:
       - GARC   # change if your branch is different
+    paths-ignore:
+      - '**/*.md'
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    
 
     steps:
     - name: Checkout repo
