@@ -1,5 +1,7 @@
 # ===============================
 # EXAMPLE APPLICATION PROPERTIES
+
+
 # ===============================
 # Copy this file to application.properties and update with your actual values
 # Do NOT commit your actual application.properties with real credentials
