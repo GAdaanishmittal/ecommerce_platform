@@ -1,4 +1,4 @@
-# 🛒 Ecommerce Project - Complete Spring Boot Learning Guide
+# 🛒 Ecommerce Project - Complete Spring Boot Guide
 
 > **A comprehensive, production-ready e-commerce platform built with Spring Boot 4.x and Java 21**
 
