@@ -29,11 +29,18 @@ jobs:
       run: chmod +x mvnw
 
     # 🔐 Demo Mode – Scan but do not fail build
-    - name: Run Snyk Security Scan
-      run: snyk test --severity-threshold=high
+    - name: Run Snyk Security Scan and Generate Report
+      run: snyk test --severity-threshold=high --json-file-output=snyk-report.json
       continue-on-error: true
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+    # 📄 Upload Snyk JSON report as artifact
+    - name: Upload Snyk Security Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: snyk-security-report
+        path: snyk-report.json
 
     - name: Upload JAR artifact
       uses: actions/upload-artifact@v4
