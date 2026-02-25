@@ -3,14 +3,14 @@ name: Build Jar on Push
 on:
   push:
     branches:
-      - GARC   # change if your branch is different
+      - GARC
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
+    - name: Checkout repository
       uses: actions/checkout@v4
 
     - name: Set up JDK 21
@@ -22,13 +22,13 @@ jobs:
     - name: Build with Maven
       run: mvn -B clean package
 
-    # 🔐 Install Snyk CLI (non-docker)
+    # Install Snyk CLI
     - name: Install Snyk
       uses: snyk/actions/setup@v1
 
-    # 🔎 Run Snyk scan (fail only on HIGH & CRITICAL)
+    # Run Snyk using system Maven (not mvnw)
     - name: Run Snyk Security Scan
-      run: snyk test --severity-threshold=high
+      run: snyk test --maven --severity-threshold=high
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
