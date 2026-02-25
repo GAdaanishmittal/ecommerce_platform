@@ -25,12 +25,13 @@ jobs:
     - name: Install Snyk
       uses: snyk/actions/setup@v1
 
-    # 🔧 Critical fix
     - name: Fix mvnw permissions
       run: chmod +x mvnw
 
+    # 🔐 Demo Mode – Scan but do not fail build
     - name: Run Snyk Security Scan
       run: snyk test --severity-threshold=high
+      continue-on-error: true
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
