@@ -137,9 +137,9 @@
 
 		<!-- Razorpay Java SDK -->
 		<dependency>
-		    <groupId>com.razorpay</groupId>
-		    <artifactId>razorpay-java</artifactId>
-		    <version>LATEST_VERSION</version>
+			<groupId>com.razorpay</groupId>
+			<artifactId>razorpay-java</artifactId>
+			<version>1.4.8</version>
 		</dependency>
 
 		<dependency>
