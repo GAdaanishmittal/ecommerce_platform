@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.2</version>
+		<version>4.0.3</version>
 		<relativePath/>
 	</parent>
 
@@ -137,9 +137,9 @@
 
 		<!-- Razorpay Java SDK -->
 		<dependency>
-			<groupId>com.razorpay</groupId>
-			<artifactId>razorpay-java</artifactId>
-			<version>1.4.8</version>
+		    <groupId>com.razorpay</groupId>
+		    <artifactId>razorpay-java</artifactId>
+		    <version>LATEST_VERSION</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.json/json -->
