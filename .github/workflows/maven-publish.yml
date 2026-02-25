@@ -16,23 +16,21 @@ jobs:
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
-        distribution: 'temurin'
-        java-version: '21'
+        distribution: temurin
+        java-version: 21
 
     - name: Build with Maven
       run: mvn -B clean package
 
-    # 🔐 Install Snyk
+    # 🔐 Install Snyk CLI (non-docker)
     - name: Install Snyk
       uses: snyk/actions/setup@v1
 
     # 🔎 Run Snyk scan (fail only on HIGH & CRITICAL)
     - name: Run Snyk Security Scan
-      uses: snyk/actions/maven@v1
+      run: snyk test --severity-threshold=high
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        args: --severity-threshold=high
 
     - name: Upload JAR artifact
       uses: actions/upload-artifact@v4
